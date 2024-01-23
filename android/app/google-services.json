@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "481372574044",
+    "project_id": "vetsistema-9f5c3",
+    "storage_bucket": "vetsistema-9f5c3.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:481372574044:android:8af7b833b7740cbfa3b199",
+        "android_client_info": {
+          "package_name": "com.example.vetsistema"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCuU96b__vEqDIfratqWbI4HiyWBLWjHvE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
