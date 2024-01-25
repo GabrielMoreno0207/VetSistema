@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 import 'package:vetsistema/View/telas%20menu/agendamentoConsulta.dart';
 import 'package:vetsistema/View/telas%20menu/cadastroCliente.dart';
 import 'package:vetsistema/View/telas%20menu/cadastroMedicamentos.dart';
@@ -7,7 +8,7 @@ import 'package:vetsistema/View/telas%20menu/cadastroPaciente.dart';
 import 'package:vetsistema/View/telas%20menu/controleFinanceiro.dart';
 import 'package:vetsistema/View/telas%20menu/estatisticas.dart';
 import 'package:vetsistema/View/telas%20menu/medicos.dart';
-import 'package:vetsistema/View/telas%20menu/procedimentosRealizados.dart';
+import 'package:vetsistema/View/telas%20menu/caixaPDV.dart';
 
 void main() {
   runApp(const MaterialApp(
@@ -19,10 +20,15 @@ class PaginaPrincipal extends StatefulWidget {
   const PaginaPrincipal({Key? key});
 
   @override
+  // ignore: library_private_types_in_public_api
   _PaginaPrincipalState createState() => _PaginaPrincipalState();
 }
 
 class _PaginaPrincipalState extends State<PaginaPrincipal> {
+  final Widget _modalContent = Container(); // Conteúdo do modal
+  Widget _selectedPageContent = Container(); // Conteúdo da página selecionada
+  bool _showConsultationList = true;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -34,6 +40,16 @@ class _PaginaPrincipalState extends State<PaginaPrincipal> {
           ),
         ),
         backgroundColor: const Color.fromARGB(255, 37, 160, 88),
+        actions: <Widget>[
+          IconButton(
+            icon: const Icon(Icons.home),
+            onPressed: () {
+              setState(() {
+                _showConsultationList = true;
+              });
+            },
+          ),
+        ],
       ),
       drawer: Drawer(
         child: ListView(
@@ -63,7 +79,7 @@ class _PaginaPrincipalState extends State<PaginaPrincipal> {
             _buildDrawerItem(
               context,
               'Cadastro de Clientes',
-              CadastroClientePage(),
+              const CadastroClientePage(),
               Icons.people,
             ),
             _buildDrawerItem(
@@ -75,7 +91,7 @@ class _PaginaPrincipalState extends State<PaginaPrincipal> {
             _buildDrawerItem(
               context,
               'Agendamento de Consultas',
-              AgendamentoConsultaPage(),
+              const AgendamentoConsultaPage(),
               Icons.event,
             ),
             _buildDrawerItem(
@@ -87,7 +103,7 @@ class _PaginaPrincipalState extends State<PaginaPrincipal> {
             _buildDrawerItem(
               context,
               'Procedimentos Realizados',
-              ProcedimentosRealizadosPage(),
+              CaixaPDVPage(),
               Icons.attach_money,
             ),
             _buildDrawerItem(
@@ -101,29 +117,28 @@ class _PaginaPrincipalState extends State<PaginaPrincipal> {
           ],
         ),
       ),
-      body: Container(
-        color: const Color.fromARGB(255, 218, 212, 212),
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(16.0),
-              color: const Color.fromARGB(255, 37, 160, 88),
-              child: _buildQuickAccessPanel(context),
+      body: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16.0),
+            color: const Color.fromARGB(255, 37, 160, 88),
+            child: _buildQuickAccessPanel(context),
+          ),
+          const SizedBox(height: 16.0),
+          const Text(
+            'Histórico de Consultas',
+            style: TextStyle(
+              fontSize: 24.0,
+              fontWeight: FontWeight.bold,
+              color: Color.fromARGB(255, 37, 160, 88),
             ),
-            const SizedBox(height: 16.0),
-            const Text(
-              'Histórico de Consultas',
-              style: TextStyle(
-                fontSize: 24.0,
-                fontWeight: FontWeight.bold,
-                color: Color.fromARGB(255, 37, 160, 88),
-              ),
-            ),
-            Expanded(
-              child: _buildConsultationList(),
-            ),
-          ],
-        ),
+          ),
+          Expanded(
+            child: _showConsultationList
+                ? _buildConsultationList() // Conteúdo da lista de consulta
+                : _selectedPageContent, // Conteúdo da página selecionada
+          ),
+        ],
       ),
     );
   }
@@ -137,7 +152,7 @@ class _PaginaPrincipalState extends State<PaginaPrincipal> {
           'CLIENTES',
           'Gerencie seus clientes',
           () {
-            // Implemente a lógica para a Ação 1
+            _showPageContent(const CadastroClientePage());
           },
           Icons.people,
         ),
@@ -146,7 +161,7 @@ class _PaginaPrincipalState extends State<PaginaPrincipal> {
           'PACIENTES',
           'Registre e visualize pacientes',
           () {
-            // Implemente a lógica para a Ação 2
+            _showPageContent(const CadastroPacientesPage());
           },
           Icons.pets,
         ),
@@ -155,7 +170,7 @@ class _PaginaPrincipalState extends State<PaginaPrincipal> {
           'MEDICAMENTOS',
           'Controle de medicamentos',
           () {
-            // Implemente a lógica para a Ação 3
+            _showPageContent(const CadastroMedicamentoPage());
           },
           Icons.local_hospital,
         ),
@@ -173,18 +188,18 @@ class _PaginaPrincipalState extends State<PaginaPrincipal> {
           'AGENDAMENTO',
           'Agende consultas e serviços',
           () {
-            // Implemente a lógica para a Ação 5
+            _showPageContent(const AgendamentoConsultaPage());
           },
           Icons.event,
         ),
         _buildQuickAccessCard(
           context,
-          'PROCEDIMENTOS REALIZADOS',
-          'Registre procedimentos médicos',
+          'CAIXA',
+          'Efetue vendas',
           () {
-            // Implemente a lógica para a Ação 6
+            _showPageContent(CaixaPDVPage());
           },
-          Icons.healing,
+          Icons.monetization_on_rounded,
         ),
       ],
     );
@@ -243,12 +258,8 @@ class _PaginaPrincipalState extends State<PaginaPrincipal> {
       ),
       leading: Icon(icon),
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => page,
-          ),
-        );
+        _showPageContent(page);
+        Navigator.pop(context); // Fecha o drawer ao selecionar uma opção
       },
     );
   }
@@ -281,12 +292,16 @@ class _PaginaPrincipalState extends State<PaginaPrincipal> {
 
   Widget _buildConsultationItem(
       BuildContext context, Map<String, dynamic> consulta) {
-    final dataConsulta = consulta['dataConsulta'] as String;
+    final Timestamp dataConsulta = consulta['dataConsulta'] as Timestamp;
     final medico = consulta['medico'] as String;
     final nomePaciente = consulta['nomePaciente'] as String;
 
+    // Use o método toDate() para converter o Timestamp em um objeto DateTime
+    final dataConsultaFormatada =
+        DateFormat('dd/MM/yyyy HH:mm').format(dataConsulta.toDate());
+
     return Container(
-      width: double.infinity, // Define a largura máxima do card
+      width: double.infinity,
       margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
       child: Card(
         elevation: 3.0,
@@ -297,7 +312,8 @@ class _PaginaPrincipalState extends State<PaginaPrincipal> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          subtitle: Text('Data da Consulta: $dataConsulta\nMédico: $medico'),
+          subtitle:
+              Text('Data da Consulta: $dataConsultaFormatada\nMédico: $medico'),
           trailing: IconButton(
             icon: const Icon(Icons.delete),
             color: const Color.fromARGB(255, 221, 12, 12),
@@ -308,5 +324,13 @@ class _PaginaPrincipalState extends State<PaginaPrincipal> {
         ),
       ),
     );
+  }
+
+  // Função para atualizar o conteúdo da página selecionada
+  void _showPageContent(Widget pageContent) {
+    setState(() {
+      _showConsultationList = false;
+      _selectedPageContent = pageContent;
+    });
   }
 }
